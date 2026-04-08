@@ -135,7 +135,6 @@
     </div>
 
     <script>
-        // PDF 데이터 추출 결과 고정
         const dinosaurVocab = [
             { "word": "fossilized", "meaning": "화석화된" },
             { "word": "paleontologist", "meaning": "고생물학자" },
@@ -150,9 +149,9 @@
             { "word": "meat-eating", "meaning": "육식의" },
             { "word": "instance", "meaning": "예시, 사례" },
             { "word": "feather", "meaning": "깃털" },
-            { "word": "species", "meaning": "종, 종(생물 분류)" },
+            { "word": "species", "meaning": "종(생물 분류), 종" },
             { "word": "classify", "meaning": "분류하다" },
-            { "word": "beak", "meaning": "(새의) 부리,부리" },
+            { "word": "beak", "meaning": "(새의) 부리, 부리" },
             { "word": "claw", "meaning": "발톱" },
             { "word": "unearthed", "meaning": "발굴된" },
             { "word": "assume", "meaning": "추정하다" },
@@ -292,20 +291,23 @@
         function checkAnswer() {
             const input = document.getElementById('answer-input');
             const feedback = document.getElementById('feedback');
-            const userAnswer = input.value.trim().toLowerCase();
+            
+            // 띄어쓰기를 모두 제거하고 소문자로 변환하여 비교 준비
+            const cleanUserAnswer = input.value.replace(/\s+/g, '').toLowerCase();
             const current = sessionWords[currentIndex];
             
             let isCorrect = false;
-            let correctAnswerStr = "";
+            let displayCorrect = "";
 
             if (mode === 'en-kr') {
-                correctAnswerStr = current.meaning.toLowerCase();
-                // 한글 뜻은 쉼표 등으로 여러 개일 수 있으므로 유연하게 체크
-                const possibleMeanings = correctAnswerStr.split(',').map(m => m.trim());
-                isCorrect = possibleMeanings.some(m => m === userAnswer || userAnswer.includes(m) || m.includes(userAnswer)) && userAnswer.length > 0;
+                displayCorrect = current.meaning;
+                // 한글 뜻 리스트를 쉼표 기준으로 나누고 각각 띄어쓰기 제거 후 비교
+                const possibleMeanings = current.meaning.split(',').map(m => m.replace(/\s+/g, '').toLowerCase());
+                isCorrect = possibleMeanings.some(m => m === cleanUserAnswer) && cleanUserAnswer.length > 0;
             } else {
-                correctAnswerStr = current.word.toLowerCase();
-                isCorrect = userAnswer === correctAnswerStr;
+                displayCorrect = current.word;
+                const cleanTarget = current.word.replace(/\s+/g, '').toLowerCase();
+                isCorrect = cleanUserAnswer === cleanTarget && cleanUserAnswer.length > 0;
             }
 
             if (isCorrect) {
@@ -314,7 +316,7 @@
                 feedback.className = "mt-8 text-center h-10 flex items-center justify-center font-bold text-xl text-emerald-500 animate-bounce";
             } else {
                 incorrectWords.push(current);
-                feedback.innerHTML = `<span class="text-red-500">오답!</span> <span class="text-slate-400 ml-2">정답: ${correctAnswerStr}</span>`;
+                feedback.innerHTML = `<span class="text-red-500">오답!</span> <span class="text-slate-400 ml-2">정답: ${displayCorrect}</span>`;
                 feedback.className = "mt-8 text-center h-10 flex items-center justify-center font-bold text-xl";
             }
 
@@ -375,7 +377,6 @@
             }
         };
 
-        // 초기화
         window.onload = () => {
             initWordList();
             lucide.createIcons();
